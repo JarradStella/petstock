@@ -1,0 +1,22 @@
+-- SQL skills test
+-- Question 1: [Customers] who purchased from the [ClassCode] of “CACC” in their initial [Sale]
+
+WITH initial_order AS (
+    SELECT
+        CustomerKey AS customer_id,
+        MIN(OrderKey) AS initial_order_id -- Grab the 1st order per customer
+    FROM 'Sale.csv'
+    GROUP BY CustomerKey
+    ORDER BY initial_order_id ASC
+)
+
+SELECT *
+FROM 'Sale.csv' AS sale
+INNER JOIN initial_order 
+    ON sale.OrderKey = initial_order.initial_order_id - table only has first orders now
+WHERE ProductKey IN (
+    SELECT DISTINCT ProductKey
+    FROM 'Product.csv'
+    WHERE ClassCode = 'CACC' -- filter first orders where product exists with classcode = 'CACC'
+)
+ORDER BY sale.OrderKey ASC;
