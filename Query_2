@@ -1,0 +1,36 @@
+-- 1a).Display the Top 10 [Customers] by Total Units Purchased.
+
+-- Join sales and product data to eventually identify where customers purchases 'CACC' products as part of their initial sale
+WITH table_1 AS (
+    SELECT *
+    FROM 'Sale.csv' AS sale
+    INNER JOIN 'Product.csv' AS product
+        ON sale.ProductKey = product.ProductKey
+    ORDER BY sale.OrderKey ASC
+),
+
+purchase_order_rank AS (
+    SELECT 
+        *,
+        RANK() OVER (PARTITION BY CustomerKey ORDER BY ServerDateTime ASC) AS OrderRank -- where rank is 1, it is the initial sale 
+    FROM table_1
+),
+
+-- list of customers who had a 'CACC' item in their initial sale
+cacc_customers AS (
+	SELECT DISTINCT
+    CustomerKey
+FROM purchase_order_rank
+WHERE OrderRank = 1 
+    AND ClassCode = 'CACC'
+ORDER BY CustomerKey ASC)
+
+SELECT 
+	sale2.CustomerKey,
+	SUM(Quantity) AS total_units -- adding up all units purchased by customer
+FROM 'Sale.csv' sale2
+INNER JOIN cacc_customers 
+	ON sale2.CustomerKey = cacc_customers.CustomerKey
+GROUP BY sale2.CustomerKey
+ORDER BY total_units DESC
+LIMIT 10 -- to keep it to the top 10 customers by total_units;
