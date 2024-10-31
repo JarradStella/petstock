@@ -1,3 +1,6 @@
+-- Question 3: Add a new column to [Sales] to show the Time the Sale occurred at the local time of the
+-- Store. (Server Time is Local time in Victoria)
+
 SELECT
     sale.*,
     store.TimeZoneName,
@@ -5,7 +8,7 @@ SELECT
         WHEN store.StoreKey = 324 THEN ServerDateTime - INTERVAL '3 HOUR'
         WHEN store.StoreKey = 391 THEN ServerDateTime - INTERVAL '1 HOUR 30 MINUTE'
         ELSE ServerDateTime
-        END AS LocalDateTime
+    END AS LocalDateTime
 FROM 'Sale.csv' AS sale
 INNER JOIN 'Store.csv' AS store
-    ON sale.StoreKey = store.StoreKey
+    ON sale.StoreKey = store.StoreKey;
