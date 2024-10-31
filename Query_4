@@ -1,10 +1,8 @@
--- And how many total Units of [ClassCode] of “CPRE” Products they have
--- purchased
+-- 1a.i Along with how many unique [ClassCode] of “CPRE” Products they have Purchased
+-- 1a.ii And how many total Units of [ClassCode] of “CPRE” Products they have Purchased
 
--- 1a).Display the Top 10 [Customers] by Total Units Purchased.
-
--- Join sales and product data to eventually identify where customers purchases 'CACC' products as part of their initial sale
 WITH table_1 AS (
+    -- Join sales and product data
     SELECT *
     FROM 'Sale.csv' AS sale
     INNER JOIN 'Product.csv' AS product
@@ -12,48 +10,54 @@ WITH table_1 AS (
     ORDER BY sale.OrderKey ASC
 ),
 
+-- Rank each purchase per customer to find the initial sale
 purchase_order_rank AS (
     SELECT 
         *,
-        RANK() OVER (PARTITION BY CustomerKey ORDER BY ServerDateTime ASC) AS OrderRank -- where rank is 1, it is the initial sale 
+        RANK() OVER (PARTITION BY CustomerKey ORDER BY ServerDateTime ASC) AS OrderRank
     FROM table_1
 ),
 
--- list of customers who had a 'CACC' item in their initial sale
+-- Identify customers with a 'CACC' item in their initial sale
 cacc_customers AS (
-	SELECT DISTINCT
-    CustomerKey
-FROM purchase_order_rank
-WHERE OrderRank = 1 
-    AND ClassCode = 'CACC'
-ORDER BY CustomerKey ASC),
+    SELECT DISTINCT
+        CustomerKey
+    FROM purchase_order_rank
+    WHERE OrderRank = 1 
+        AND ClassCode = 'CACC'
+    ORDER BY CustomerKey ASC
+),
 
+-- Filter sales for 'CACC' customers and join with product details
 table_4 AS (
-	SELECT 
-	*
-	FROM 'Sale.csv' sale2
-	INNER JOIN cacc_customers 
-		ON sale2.CustomerKey = cacc_customers.CustomerKey
-	INNER JOIN 'Product.csv' AS product
-		ON sale2.ProductKey = product.ProductKey),
+    SELECT *
+    FROM 'Sale.csv' AS sale2
+    INNER JOIN cacc_customers 
+        ON sale2.CustomerKey = cacc_customers.CustomerKey
+    INNER JOIN 'Product.csv' AS product
+        ON sale2.ProductKey = product.ProductKey
+),
 
+-- Calculate total units purchased by top 10 'CACC' customers
 top_10_customers AS (
-	SELECT 
-	table_4.CustomerKey,
-		SUM(Quantity) AS total_units -- adding up all units purchased by customer
-	FROM table_4
-	GROUP BY table_4.CustomerKey
-	ORDER BY total_units DESC
-	LIMIT 10) -- to keep it to the top 10 customers by total_units
-	
+    SELECT 
+        table_4.CustomerKey,
+        SUM(Quantity) AS total_units
+    FROM table_4
+    GROUP BY table_4.CustomerKey
+    ORDER BY total_units DESC
+    LIMIT 10
+)
+
+-- Select and count 'CPRE' products for top 10 customers
 SELECT 
-	top_10_customers.CustomerKey,
-	top_10_customers.total_units,
-	COUNT(DISTINCT table_4.ProductKey) AS count_unique_cpre_products,
-	SUM(table_4.Quantity) AS total_cpre_units
+    top_10_customers.CustomerKey,
+    top_10_customers.total_units,
+    COUNT(DISTINCT table_4.ProductKey) AS count_unique_cpre_products,
+    SUM(table_4.Quantity) AS total_cpre_units
 FROM top_10_customers 
 INNER JOIN table_4
-	ON table_4.CustomerKey = top_10_customers.CustomerKey
+    ON table_4.CustomerKey = top_10_customers.CustomerKey
 WHERE table_4.ClassCode = 'CPRE'
-GROUP BY 1, 2
+GROUP BY top_10_customers.CustomerKey, top_10_customers.total_units
 ORDER BY total_units DESC;
