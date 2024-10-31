@@ -1,7 +1,7 @@
 -- SQL skills test
--- Question 1: [Customers] who purchased from the [ClassCode] of “CACC” in their initial [Sale]
+-- Question 1: Identify customers who purchased from the [ClassCode] of "CACC" in their initial [Sale]
 
--- Join sales and product data to eventually identify where customers purchases 'CACC' products as part of their initial sale
+-- Step 1: Join sales and product data to identify 'CACC' product purchases in initial sales
 WITH table_1 AS (
     SELECT *
     FROM 'Sale.csv' AS sale
@@ -10,17 +10,19 @@ WITH table_1 AS (
     ORDER BY sale.OrderKey ASC
 ),
 
+-- Step 2: Rank purchases by each customer to determine the initial sale
 purchase_order_rank AS (
     SELECT 
         *,
-        RANK() OVER (PARTITION BY CustomerKey ORDER BY ServerDateTime ASC) AS OrderRank -- where rank is 1, it is the initial sale 
+        RANK() OVER (PARTITION BY CustomerKey ORDER BY ServerDateTime ASC) AS OrderRank  -- Rank 1 indicates the initial sale 
     FROM table_1
 )
 
--- list of customers who had a 'CACC' item in their initial sale
+-- Step 3: Select customers who had a 'CACC' item in their initial sale
 SELECT DISTINCT
     CustomerKey
 FROM purchase_order_rank
 WHERE OrderRank = 1 
     AND ClassCode = 'CACC'
 ORDER BY CustomerKey ASC;
+
