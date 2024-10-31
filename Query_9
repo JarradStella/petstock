@@ -1,0 +1,11 @@
+SELECT
+    sale.*,
+    store.TimeZoneName,
+    CASE
+        WHEN store.StoreKey = 324 THEN ServerDateTime - INTERVAL '3 HOUR'
+        WHEN store.StoreKey = 391 THEN ServerDateTime - INTERVAL '1 HOUR 30 MINUTE'
+        ELSE ServerDateTime
+        END AS LocalDateTime
+FROM 'Sale.csv' AS sale
+INNER JOIN 'Store.csv' AS store
+    ON sale.StoreKey = store.StoreKey
