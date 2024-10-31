@@ -1,13 +1,15 @@
 -- SQL skills test
--- Question 2a: Add a new column to identify [Sales] where the below has occurred a). StoreBanner = “PETstock” and b). the StoreClass = “Retail”
+-- Question 2a: Add a new column to identify [Sales] where:
+-- a) StoreBanner = “PETstock” 
+-- b) StoreClass = “Retail”
 
 SELECT
- 	sales.*,
-	CASE
-		WHEN store.StoreBanner = 'PETstock' AND store.StoreClass = 'Retail' THEN 'YES'
-		ELSE 'NO'
-		END AS extra_conditions_met
+    sales.*,
+    CASE
+        WHEN store.StoreBanner = 'PETstock' AND store.StoreClass = 'Retail' THEN 'YES'
+        ELSE 'NO'
+    END AS extra_conditions_met
 FROM 'Sale.csv' AS sales
 INNER JOIN 'Store.csv' AS store
-	ON sales.StoreKey = store.StoreKey
-ORDER BY sales.date ASC
+    ON sales.StoreKey = store.StoreKey
+ORDER BY sales.date ASC;
