@@ -1,26 +1,27 @@
 -- SQL skills test
--- Question 2.b.i: But, include the Staff Accounts if the GroupCode = “CGLW”
+-- Question 2.b.i: Include Staff Accounts if the GroupCode = “CGLW”
 
 WITH table_1 AS (
-	SELECT
- 	sales.*,
-	CASE
-		WHEN store.StoreBanner = 'PETstock' AND store.StoreClass = 'Retail' 		THEN 'YES'
-		ELSE 'NO'
-	END AS extra_conditions_met,
-	customer.IsStaffAccount,
-	product.GroupCode
-FROM 'Sale.csv' AS sales
-INNER JOIN 'Store.csv' AS store
-	ON sales.StoreKey = store.StoreKey
-INNER JOIN 'Customer.csv' AS customer
-	ON customer.CustomerKey = sales.CustomerKey
-LEFT JOIN 'Product.csv' AS product
-	ON sales.ProductKey = product.ProductKey
-	-- AND customer.IsStaffAccount = 'False'
-ORDER BY sales.date ASC)
+    SELECT
+        sales.*,
+        CASE
+            WHEN store.StoreBanner = 'PETstock' AND store.StoreClass = 'Retail' THEN 'YES'
+            ELSE 'NO'
+        END AS extra_conditions_met,
+        customer.IsStaffAccount,
+        product.GroupCode
+    FROM 'Sale.csv' AS sales
+    INNER JOIN 'Store.csv' AS store
+        ON sales.StoreKey = store.StoreKey
+    INNER JOIN 'Customer.csv' AS customer
+        ON customer.CustomerKey = sales.CustomerKey
+    LEFT JOIN 'Product.csv' AS product
+        ON sales.ProductKey = product.ProductKey
+    ORDER BY sales.date ASC
+)
 
 SELECT 
-	*
+    *
 FROM table_1
-WHERE (table_1.IsStaffAccount = 'False' OR table_1.GroupCode = 'CGLW')
+WHERE 
+    (table_1.IsStaffAccount = 'False' OR table_1.GroupCode = 'CGLW');
