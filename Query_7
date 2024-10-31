@@ -1,0 +1,27 @@
+-- SQL skills test
+-- Question 2b: And the Customer is not a Staff Account
+
+WITH table_1 AS (
+	SELECT
+ 	sales.*,
+	CASE
+		WHEN store.StoreBanner = 'PETstock' AND store.StoreClass = 'Retail' 		THEN 'YES'
+		ELSE 'NO'
+	END AS extra_conditions_met,
+	customer.IsStaffAccount
+FROM 'Sale.csv' AS sales
+INNER JOIN 'Store.csv' AS store
+	ON sales.StoreKey = store.StoreKey
+INNER JOIN 'Customer.csv' AS customer
+	ON customer.CustomerKey = sales.CustomerKey
+	AND customer.IsStaffAccount = 'False'
+ORDER BY sales.date ASC)
+
+SELECT 
+	*
+FROM table_1;
+	
+
+
+
+
